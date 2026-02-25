@@ -78,7 +78,7 @@ print(example_messages[0].content)
 
 # Como atualizar o prompt:
 
-prompt.messages[0].prompt.template = '''You are a virtual assistant who will answer questions on a test about Boolean logic and solar energy. When you don't have the answer, create one that you think is right.
+prompt.messages[0].prompt.template = '''You are a virtual assistant who will answer questions on a test about Boolean logic and solar energy. If the answer is not in the context, say that the information was not found.
 Question: {question}
 Context: {context}
 Answer:'''
