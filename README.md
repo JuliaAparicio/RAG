@@ -1,108 +1,70 @@
-# 🧠 RAG System – Retrieval-Augmented Generation
+# 🧠 RAG Pipeline com LangChain + LangGraph
 
-Implementação personalizada de um sistema de Retrieval-Augmented Generation (RAG), capaz de integrar múltiplas fontes de conhecimento e gerar respostas contextualizadas com base em documentos externos.
-
----
-
-## 🚀 Sobre o Projeto
-
-Este projeto implementa um pipeline de RAG que combina:
-
-- Busca semântica em documentos
-- Banco de vetores (vector database)
-- Modelo de linguagem (LLM)
-- Geração de respostas contextualizadas
-
-A proposta foi personalizar uma base inicial fornecida em aula e expandir a arquitetura para integrar diferentes tipos de fontes de conhecimento.
+Implementação de um sistema de Retrieval-Augmented Generation (RAG) utilizando LangChain, LangGraph e OpenAI, integrando múltiplas fontes de conhecimento (PDF e conteúdo externo) para geração de respostas contextualizadas e fundamentadas.
 
 ---
 
-## 📚 Fontes Utilizadas
+## 🚀 Visão Geral
 
-O sistema foi configurado para processar e consultar:
+Este projeto implementa um pipeline completo de RAG capaz de:
 
-- 📄 PDF sobre Álgebra Booleana  
-- 🎥 Vídeo do YouTube sobre Energia Solar  
+- Ingerir documentos de diferentes fontes
+- Dividir o conteúdo em chunks estratégicos
+- Gerar embeddings semânticos
+- Armazenar em banco vetorial
+- Recuperar trechos relevantes via similaridade
+- Injetar contexto no prompt
+- Gerar respostas fundamentadas usando LLM
 
-Os conteúdos são convertidos em texto, divididos em trechos menores (chunking) e armazenados em um banco vetorial.
-
----
-
-## ⚙️ Como Funciona
-
-1. **Ingestão de Dados**
-   - Extração de texto do PDF
-   - Transcrição do vídeo do YouTube
-   - Divisão do conteúdo em chunks
-
-2. **Vetorização**
-   - Conversão dos trechos em embeddings
-   - Armazenamento em banco de vetores
-
-3. **Consulta**
-   - O usuário faz uma pergunta
-   - O sistema busca os trechos semanticamente mais relevantes
-   - Os trechos são enviados junto ao prompt para o modelo de linguagem
-
-4. **Geração da Resposta**
-   - O LLM gera uma resposta baseada no contexto recuperado
-   - Redução de alucinações
-   - Respostas mais precisas e fundamentadas
+A orquestração do fluxo foi realizada com **LangGraph**, organizando o sistema em etapas modulares de recuperação e geração.
 
 ---
 
-## 🧠 Conceitos Aplicados
+## 🏗️ Arquitetura do Sistema
 
-- Retrieval-Augmented Generation (RAG)
-- Embeddings
-- Busca semântica
-- Engenharia de Prompt
-- Chunking Strategy
-- Context Injection
-- Redução de alucinação em LLMs
+O pipeline segue as seguintes etapas:
 
----
+### 1️⃣ Ingestão de Dados
 
-## 🛠️ Tecnologias Utilizadas
+Fontes utilizadas:
 
-- Python
-- Biblioteca de embeddings
-- Banco de vetores
-- API de modelo de linguagem
-- Processamento de texto
-- Transcrição de vídeo
+- 📄 PDF (TCC sobre Matemática / Álgebra Booleana)
+- 📦 Conteúdo externo carregado via loader
+
+Ferramentas:
+- `PyPDFLoader`
+- `YoutubeLoaderDL`
+- `langchain_community.document_loaders`
 
 ---
 
-## 🎯 Objetivo do Projeto
+### 2️⃣ Chunking
 
-Explorar como a personalização de um pipeline RAG pode:
+Utilização de:
 
-- Melhorar a precisão de respostas
-- Integrar diferentes fontes de conhecimento
-- Criar sistemas de IA mais confiáveis
-- Aplicar conceitos avançados de NLP na prática
+- `RecursiveCharacterTextSplitter`
+- `chunk_size = 1000`
+- `chunk_overlap = 200`
 
----
-
-## 🔎 Aprendizados
-
-Mesmo partindo de uma base fornecida, a personalização da arquitetura, da estratégia de chunking e do fluxo de consulta foi fundamental para:
-
-- Melhorar a qualidade das respostas
-- Entender o funcionamento interno de sistemas baseados em LLM
-- Desenvolver visão crítica sobre limitações e melhorias possíveis
+Objetivo:
+- Preservar contexto semântico
+- Reduzir perda de informação
+- Melhorar precisão da busca vetorial
 
 ---
 
-## ▶️ Como Executar
+### 3️⃣ Vetorização
 
-```bash
-# Clone o repositório
-git clone <url-do-repositorio>
+- Modelo de embeddings: `text-embedding-ada-002`
+- Banco vetorial: `InMemoryVectorStore`
 
-# Instale as dependências
-pip install -r requirements.txt
+Cada chunk é transformado em embedding e armazenado para posterior busca por similaridade semântica.
 
-# Execute o projeto
-python main.py
+---
+
+### 4️⃣ Recuperação (Retrieval)
+
+```python
+def retrieve(state: State):
+    retrieved_docs = vector_store.similarity_search(state["question"])
+    return {"context": retrieved_docs}
